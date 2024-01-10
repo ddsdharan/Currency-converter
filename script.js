@@ -1,4 +1,4 @@
-const apiUrl = "http://data.fixer.io/api/";
+const apiUrl = "//data.fixer.io/api/";
 const symbols = "symbols";
 const apiKey = "564c52274b85463985e1effa243f8c19";
 
