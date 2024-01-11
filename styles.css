@@ -1,18 +1,50 @@
 html, body {
     background-image: url("/Logo/jonatan.jpg");
-    background-repeat: no-repeat;
+    background-repeat: repeat;
     background-size: cover;
     height: 100%;
     margin: 0;
   }
 
-.container-fluid {
-  height: 100%;
+#container-fluid {
+  height: auto;
   display: flex;
-  justify-content: center;
+  justify-content:center;
   align-items: center;
-  border: 2px solid black;
   border-radius: 4px;
+  padding-top: 10%;
+  margin-left: 60px;
+}
+
+nav .container-fluid {
+  background-color: #aaaaaa;
+}
+
+.container-sm {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+}
+
+#formContainer {
+  background: transparent;
+  border: 0.5px solid #aaaaaa;
+  border-radius: 5px;
+  padding-top: 20px;
+  backdrop-filter: blur(5px);
+  display: flex;
+  flex-direction:column;
+  justify-content: space-around;
+  align-items: center;
+  box-shadow: inset 0 0 10px #aaaaaa, 0 0 10px #aaaaaa;
+}
+
+div .input-group {
+  width: 100% ;
+}
+
+.input-group-text {
+  width: 25%;
 }
 
 .para {
@@ -22,7 +54,46 @@ html, body {
   padding: 20px;
 }
 
-#date {
-  color: white;
-  font-weight: 500;
+@media screen and (max-width: 767px) {
+
+  .nav .container-fluid {
+    height: 40px;
+    padding: 10px;
+}
+
+  .container-fluid {
+      width: 100%;
+      flex-direction: column;
+  }
+
+  .container-sm {
+      flex-direction: column;
+      margin-top: 20px ;
+  }
+
+  #formContainer {
+      width: 80%;
+  }
+}
+
+@media screen and (max-width: 991px) {
+
+  .nav .container-fluid {
+    height: 40px;
+    padding: 10px;
+}
+
+  .container-fluid {
+      width: 100%;
+      flex-direction: column;
+  }
+
+  .container-sm {
+      flex-direction: column;
+      margin-top: 20px ;
+  }
+
+  #formContainer {
+      width: 80%;
+  }
 }
