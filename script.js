@@ -1,81 +1,82 @@
-const apiUrl = "//data.fixer.io/api/";
-const symbols = "symbols";
-const apiKey = "564c52274b85463985e1effa243f8c19";
+document.addEventListener("DOMContentLoaded", function () {
+    const apiKey = "4296fc0083913d76db06b968"
+    const apiUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/codes`;
+    const baseCodeSelect = document.getElementById("inputGroupSelect01");
+    const targetCodeSelect = document.getElementById("inputGroupSelect02");
+    const amountInput = document.getElementById("form-control01");
+    const convertButton = document.getElementById("convertButton");
+    const resetButton = document.getElementById("resetButton");
+    const dateUpdated = document.getElementById("cardFooter");
+    const card = document.querySelector(".card");
+    const baseValue = document.getElementById("baseValue");
+    const targetValue = document.getElementById("targetValue");
+    const cardText = document.getElementById("card-text");
 
-fetch(`${apiUrl}${symbols}?access_key=${apiKey}`)
-    .then(response => response.json())
-    .then(data => {
-        const selectElement01 = document.getElementById('inputGroupSelect01');
-        const selectElement02 = document.getElementById('inputGroupSelect02');
-        const currencyCodeElement01 = document.getElementById('currencyCode01');
-        const currencyCodeElement02 = document.getElementById('currencyCode02');
+    card.style.display = "none";
 
-        for (const symbol in data.symbols) {
-            const option = document.createElement('option');
-            option.value = symbol;
-            option.textContent = `${symbol} - ${data.symbols[symbol]}`;
-            selectElement01.appendChild(option);
-        }
-
-        selectElement01.addEventListener('change', (event) => {
-            const selectedFSymbol = event.target.value;
-            currencyCodeElement01.textContent = selectedFSymbol;
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            if (data.result === "success") {
+                data.supported_codes.forEach(code => {
+                    const option = document.createElement("option");
+                    option.value = code[0];
+                    option.text = `${code[0]} - ${code[1]}`;
+                    baseCodeSelect.appendChild(option);
+                });
+            }
+            if (data.result === "success") {
+                data.supported_codes.forEach(code => {
+                    const option = document.createElement("option");
+                    option.value = code[0];
+                    option.text = `${code[0]} - ${code[1]}`;
+                    targetCodeSelect.appendChild(option);
+                });
+            }
+            else {
+                console.error("Failed to fetch supported currency codes:", data.result);
+            }
         })
+        .catch(error => console.error("Error fetching supported currency codes:", error));
 
-        for (const symbol in data.symbols) {
-            const option = document.createElement('option');
-            option.value = symbol;
-            option.textContent = `${symbol} - ${data.symbols[symbol]}`;
-            selectElement02.appendChild(option);
+    baseCodeSelect.addEventListener("change", function () {
+        const selectedBaseCode = baseCodeSelect.value;
+        document.getElementById("currencyCode01").textContent = selectedBaseCode;
+    });
+
+    convertButton.addEventListener("click", function () {
+        const baseCode = baseCodeSelect.value;
+        const targetCode = targetCodeSelect.value;
+        const amount = amountInput.value;
+
+        if (!baseCode || !targetCode || !amount) {
+            alert("Please select both base and target currencies, and enter the amount.");
+            return;
         }
+        const convertUrl = `https://v6.exchangerate-api.com/v6/${apiKey}/pair/${baseCode}/${targetCode}/${amount}`;
+        fetch(convertUrl)
+            .then(response => response.json())
+            .then(data => {
+                if (data.result === "success") {
+                    const dateTimeParts = data.time_last_update_utc.split(" ");
+                    dateUpdated.textContent = `Last updated: ${dateTimeParts[0]} ${dateTimeParts[1]} ${dateTimeParts[2]} ${dateTimeParts[3]}`;
+                    baseValue.textContent = `${amountInput.value} ${baseCode}`;
+                    targetValue.textContent = `${data.conversion_result} ${targetCode}`;
+                    cardText.textContent = `One ${baseCode} = ${data.conversion_rate} ${targetCode}`;
+                    card.style.display = "block";
+                }
+                else {
+                    console.error("Conversion failed:", data.result);
+                    alert("Conversion failed. Please try again.");
+                }
+            })
+            .catch(error => console.error("Error fetching conversion result:", error));
+    });
 
-        selectElement02.addEventListener('change', (event) => {
-            const selectedTSymbol = event.target.value;
-            currencyCodeElement02.textContent = selectedTSymbol;
-        })
-
-        const button = document.getElementById('convertButton');
-        button.addEventListener('click', handleConvert);
-
-        function handleConvert() {
-            const from = document.getElementById('currencyCode01').innerText;
-            const to = document.getElementById('currencyCode02').innerText;
-            const amount = document.getElementById('form-control01').value;
-            const outputAmount = document.getElementById('form-control02');
-
-            const latest = "latest";
-            const convertUrl = `${apiUrl}${latest}?access_key=${apiKey}`;
-
-            fetch(convertUrl)
-                .then(response => response.json())
-                .then(data => {
-                    const exchangeRates = data.rates;
-
-                    const timestamp = data.timestamp;
-                    const formattedDateTime = convertTimestamp(timestamp);
-                    console.log(formattedDateTime);
-                    const dateTime = document.getElementById('date');
-                    dateTime.textContent = "Last updated on " + formattedDateTime;
-
-                    if (exchangeRates.hasOwnProperty(from) && exchangeRates.hasOwnProperty(to)) {
-                        const convertedAmount = convertCurrency(amount, from, to, exchangeRates);
-                        outputAmount.value = convertedAmount;
-                    } else {
-                        console.log("Currency conversion is not supported for the selected currencies.");
-                    }
-                })
-                .catch(error => console.log('Error:', error));
-        }
-        function convertCurrency(amount, fromCurrency, toCurrency, exchangeRates) {
-            const eurAmount = amount / exchangeRates[fromCurrency];
-            const convertedAmount = eurAmount * exchangeRates[toCurrency];
-            return convertedAmount;
-        }
-        function convertTimestamp(unixTimestamp) {
-            const milliseconds = unixTimestamp * 1000;
-            const dateObject = new Date(milliseconds);
-            const formattedDateTime = dateObject.toLocaleString();
-            return formattedDateTime;
-        }
-    })
-    .catch(error => console.log('Error:', error));
+    resetButton.addEventListener("click", function () {
+        baseCodeSelect.value = "";
+        targetCodeSelect.value = "";
+        amountInput.value = "";
+        card.style.display = "none";
+    });
+});
